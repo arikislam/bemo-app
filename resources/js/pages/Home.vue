@@ -1,18 +1,24 @@
 <template>
   <div class="board">
-    <draggable class="board__draggable" v-model="lists" group="lists" @start="onstart" @end="onEnd"  @update-cards="handleCardUpdate">
+    <draggable class="board__draggable" v-model="lists" group="lists" @start="onstart" @end="onEnd" @update-cards="handleCardUpdate">
       <list-item v-for="listItem in lists" :listItem="listItem" :key="listItem.id"/>
+      <div class="board__list" :draggable="false">
+        <button class="add-list-btn" @click="addList">Add List</button>
+      </div>
     </draggable>
+
   </div>
 </template>
 
 <script>
 import draggable from 'vuedraggable';
-import ListItem from '../components/Application/Column.vue';
+import ListItem from '../components/application/Column.vue';
+import Card from "../components/application/Card.vue";
 
 export default {
   name: "Board",
   components: {
+    Card,
     ListItem,
     draggable
   },
@@ -119,6 +125,9 @@ export default {
     }
   },
   methods: {
+    addList() {
+      console.log('add list')
+    },
     onstart(event) {
       this.drag = true
       console.log('Drag started')
@@ -192,6 +201,18 @@ export default {
     border-radius: 3px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
+}
+
+.add-list-btn {
+  /* Style for your Add List button */
+  cursor: pointer;
+  background-color: #4CAF50; /* Example style */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  margin: 20px 0;
+  width: 100%;
 }
 
 @media (max-width: 768px) {

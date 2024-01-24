@@ -2,7 +2,7 @@ require('./bootstrap');
 window.Vue = require('vue').default;
 
 const VueRouter = require('vue-router');
-const routes = require('./router'); // Adjust the path if necessary
+const routes = require('./router');
 
 Vue.use(VueRouter);
 
