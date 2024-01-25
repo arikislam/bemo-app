@@ -17,7 +17,7 @@ export default {
      httpClient.post('dump-db').then(({data: {data}}) => {
        const element = document.createElement('a');
        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
-       element.setAttribute('download', 'dump.sql');
+       element.setAttribute('download', 'dump.sql.gz');
        element.style.display = 'none';
        document.body.appendChild(element);
        element.click();
