@@ -14,15 +14,13 @@ class DumpDatabaseController extends Controller
         $password = config('database.connections.mysql.password');
         $dumpPath = public_path('db-dumps/' . $databaseName . '.sql.gz');
         try {
-//            \Spatie\DbDumper\Databases\MySql::create()
-//                ->setDbName($databaseName)
-//                ->setUserName($userName)
-//                ->setPassword($password)
-//                ->includeTables(['card_lists', 'cards'])
-//                ->useCompressor(new GzipCompressor())
-//                ->dumpToFile(public_path('db-dumps/' . $databaseName . '.sql.gz'));
+            \Spatie\DbDumper\Databases\MySql::create()
+                ->setDbName($databaseName)
+                ->setUserName($userName)
+                ->setPassword($password)
+                ->includeTables(['card_lists', 'cards'])
+                ->dumpToFile($dumpPath);
             return response()->file($dumpPath);
-//            return response()->json([ 'data' => '/db-dumps/' . $databaseName . '.sql.gz' ]);
         } catch (\Exception $exception) {
             return response()->json([
                 'message' => $exception->getMessage(),
