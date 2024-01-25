@@ -20,4 +20,21 @@ class CardList extends Model
     {
         return $this->hasMany(Card::class);
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($cardList) {
+            $maxOrder = static::max('order');
+            $cardList->order = $maxOrder + 1;
+        });
+
+        static::deleting(function ($cardList) {
+            $deletedOrder = $cardList->order;
+            static::where('order', '>', $deletedOrder)
+                ->decrement('order');
+        });
+    }
+
 }

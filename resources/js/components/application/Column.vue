@@ -5,10 +5,11 @@
       <button class="delete-list-btn" @click="deleteList">X</button>
     </div>
     <draggable class="card-container" v-model="listItem.cards" group="shared-cards" @start="onstart" @end="onEnd">
-      <card v-for="card in listItem.cards"  :card="card" :key="card.id" @cardClick="showCardDetails"/>
+      <card v-for="card in listItem.cards" :card="card" :key="card.id" @cardClick="showCardDetails"/>
     </draggable>
 
-    <card-details :card="selectedCard" v-if="showModal" :showModal ="showModal"  @close="showModal=false" @save="saveData"/>
+    <card-details :card="selectedCard" v-if="showModal" :showModal="showModal" @close="showModal=false"
+                  @save="saveData"/>
   </div>
 
 </template>
@@ -17,6 +18,7 @@
 import draggable from 'vuedraggable';
 import Card from "./Card.vue";
 import CardDetails from "./modals/CardDetails.vue";
+import httpClient from "../../client";
 
 export default {
   components: {
@@ -44,7 +46,13 @@ export default {
   },
   methods: {
     deleteList() {
-      console.log('Delete list');
+      httpClient.delete(`/lists/${this.listItem.id}`)
+          .then(({data: {data}}) => {
+            this.$emit('delete-list', data);
+          })
+          .catch(error => {
+            console.log(error);
+          });
     },
     onstart(event) {
       this.drag = true

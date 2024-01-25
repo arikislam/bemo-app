@@ -1,12 +1,12 @@
 <template>
   <div class="board">
     <draggable class="board__draggable" v-model="lists" group="lists" @start="onstart" @end="onEnd" @update-cards="handleCardUpdate">
-      <list-item v-for="listItem in lists" :listItem="listItem" :key="listItem.id"/>
+      <list-item v-for="listItem in lists" :listItem="listItem" :key="listItem.id" @delete-list="listDeleted"/>
       <div class="board__list" :draggable="false">
         <button class="add-list-btn" @click="addList">Add List</button>
       </div>
     </draggable>
-
+    <crete-list :show-modal="showListCreateModal" v-if="showListCreateModal" @close="showListCreateModal=false" @save="saveList" />
   </div>
 </template>
 
@@ -14,119 +14,26 @@
 import draggable from 'vuedraggable';
 import ListItem from '../components/application/Column.vue';
 import Card from "../components/application/Card.vue";
-
+import httpClient from "../client";
+import CreteList from "../components/application/modals/CreteList.vue";
 export default {
   name: "Board",
   components: {
     Card,
     ListItem,
-    draggable
+    draggable,
+    CreteList
   },
   data() {
     return {
+      showListCreateModal: false,
       drag: false,
-      lists: [
-        {
-          "id": 1,
-          "title": "List 1",
-          "order": 0,
-          "cards": [
-            {
-              "id": 1,
-              "title": "List 1 Card 1",
-              "details": "Card details 1",
-              "order": 0
-            },
-            {
-              "id": 2,
-              "title": "List 1 Card 2",
-              "details": "Card details 2",
-              "order": 1
-            }
-          ]
-        },
-        {
-          "id": 2,
-          "title": "List 2",
-          "order": 1,
-          "cards": [
-            {
-              "id": 1,
-              "title": "List 2 Card 1",
-              "details": "Card details 1",
-              "order": 0
-            },
-            {
-              "id": 2,
-              "title": "List 2 Card 2",
-              "details": "Card details 2",
-              "order": 1
-            }
-          ]
-        },
-        {
-          "id": 3,
-          "title": "List 3",
-          "order": 2,
-          "cards": [
-            {
-              "id": 1,
-              "title": "List 3 Card 1",
-              "details": "Card details 1",
-              "order": 0
-            },
-            {
-              "id": 2,
-              "title": "List 3 Card 2",
-              "details": "Card details 2",
-              "order": 1
-            }
-          ]
-        },
-        {
-          "id": 4,
-          "title": "List 4",
-          "order": 3,
-          "cards": [
-            {
-              "id": 1,
-              "title": "List 4 Card 1",
-              "details": "Card details 1",
-              "order": 0
-            },
-            {
-              "id": 2,
-              "title": "List 4 Card 2",
-              "details": "Card details 2",
-              "order": 1
-            }
-          ]
-        },
-        {
-          "id": 5,
-          "title": "List 5",
-          "order": 4,
-          "cards": [
-            {
-              "id": 1,
-              "title": "List 5 Card 1",
-              "details": "Card details 1",
-              "order": 0
-            },
-            {
-              "id": 2,
-              "title": "List 5 Card 2",
-              "details": "Card details 2",
-              "order": 1
-            }
-          ]
-        }
-      ]
+      lists: []
     }
   },
   methods: {
     addList() {
-      console.log('add list')
+      this.showListCreateModal = true;
     },
     onstart(event) {
       this.drag = true
@@ -134,16 +41,23 @@ export default {
       // Handle the start of the dragging
     },
     onEnd(event) {
-      this.drag = false
-      console.log('Drag ended')
       // Handle the end of the dragging
      this.updateListOrder();
-
-      console.log(this.lists)
     },
     updateListOrder() {
       this.lists.forEach((list, index) => {
         list.order = index;
+      });
+      const data = this.lists.map(list => {
+        return {
+          id: list.id,
+          order: list.order
+        }
+      });
+      httpClient.post('lists/order-update', {data}).then(({data: {data}}) => {
+        this.lists = data;
+      }).catch(error => {
+        console.log(error);
       });
     },
     handleCardUpdate({ listId, cards }) {
@@ -151,8 +65,29 @@ export default {
       if (listToUpdate) {
         listToUpdate.cards = cards;
       }
+    },
+    getList() {
+      httpClient.get('lists').then(({data: {data}}) => {
+        this.lists = data;
+      }).catch(error => {
+        console.log(error);
+      });
+    },
+    saveList(formData) {
+      httpClient.post('lists', formData).then(({data: {data}}) => {
+        this.lists = data;
+      }).catch(error => {
+        console.log(error);
+      });
+      this.showListCreateModal = false;
+    },
+    listDeleted(data) {
+      this.lists = data;
     }
 
+  },
+  mounted() {
+    this.getList();
   }
 }
 </script>

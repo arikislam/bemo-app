@@ -23,8 +23,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/lists', GetListDetailsController::class);
 Route::post('/lists', CreateNewListController::class);
-Route::delete('/lists/{list}', DeleteListController::class);
-Route::post('/lists-order-update', UpdateLIstOrderController::class);
+Route::post('/lists/order-update', UpdateLIstOrderController::class);
+Route::delete('/lists/{cardList}', DeleteListController::class);
+
 
 Route::post('/cards', CreateCardController::class);
 Route::patch('/cards/{card}', UpdateCardController::class);
