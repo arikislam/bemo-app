@@ -17,7 +17,7 @@ class DumpDatabaseController extends Controller
                 ->setDbName($databaseName)
                 ->setUserName($userName)
                 ->setPassword($password)
-                ->includeTables(['card_lists', 'card'])
+                ->includeTables(['card_lists', 'cards'])
                 ->useCompressor(new GzipCompressor())
                 ->dumpToFile(public_path('db-dumps/' . $databaseName . '.sql.gz'));
         } catch (\Exception $exception) {
