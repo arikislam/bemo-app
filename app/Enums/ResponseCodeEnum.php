@@ -1,0 +1,15 @@
+<?php
+
+namespace App\Enums;
+
+enum ResponseCodeEnum: string
+{
+    case GEN_FORBIDDEN = 'GEN-FORBIDDEN';
+    case GEN_API_ERROR = 'GEN-API-ERROR';
+    case GEN_NOT_FOUND = 'GEN-NOT-FOUND';
+    case GEN_UNAUTHORIZED = 'GEN-UNAUTHORIZED';
+    case GEN_WRONG_ARGS = 'GEN-WRONG-ARGS';
+    case FEATURE_NOT_ALLOWED = 'FEATURE-NOT-ALLOWED';
+    case REACH_PLAN_LIMIT = 'REACH-PLAN-LIMIT';
+    case INSUFFICIENT_CREDITS = 'INSUFFICIENT-CREDITS';
+}
