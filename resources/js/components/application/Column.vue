@@ -1,7 +1,7 @@
 <template>
   <div class="board__list">
     <div class="board__list-header">
-      <h2 class="board__list-title">{{ title }} {{ listItem.id }}</h2>
+      <h2 class="board__list-title">{{ title }}</h2>
       <button class="delete-list-btn" @click="deleteList">X</button>
     </div>
     <draggable class="card-container" v-model="listItem.cards" group="shared-cards" @start="onstart" @end="onEnd"
