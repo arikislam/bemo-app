@@ -14,9 +14,9 @@ export default {
   name: "ManageApp",
   methods: {
     downLoadDump() {
-     httpClient.post('dump-db').then(({data: {data}}) => {
+     httpClient.post('dump-db').then(res => {
        const element = document.createElement('a');
-       element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
+       element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(res));
        element.setAttribute('download', 'dump.sql');
        element.style.display = 'none';
        document.body.appendChild(element);
