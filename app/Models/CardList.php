@@ -18,7 +18,7 @@ class CardList extends Model
 
     public function cards(): HasMany
     {
-        return $this->hasMany(Card::class);
+        return $this->hasMany(Card::class)->orderBy('order');
     }
 
     protected static function boot()

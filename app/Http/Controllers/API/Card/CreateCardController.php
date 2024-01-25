@@ -9,13 +9,13 @@ use Illuminate\Http\Request;
 
 class CreateCardController extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(CardList $cardList, Request $request)
     {
         $request->validate([
             'title'   => 'required|string|max:255',
             'details' => 'required|string|max:255',
         ]);
-        $cardList= CardList::findOrfail($request->get('list_id'));
+
         $card = $cardList->cards()->create([
             'title'   => $request->get('title'),
             'details' => $request->get('details'),

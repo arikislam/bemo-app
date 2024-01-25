@@ -90,12 +90,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _client__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../client */ "./resources/js/client.js");
 /* harmony import */ var _client__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_client__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _modals_CreateCard_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modals/CreateCard.vue */ "./resources/js/components/application/modals/CreateCard.vue");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : String(i); }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 
 
 
@@ -119,7 +113,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       drag: false,
       showModal: false,
       selectedCard: null,
-      showCreateModal: false
+      showCreateModal: false,
+      draggedCard: null
     };
   },
   computed: {
@@ -139,18 +134,29 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     },
     onstart: function onstart(event) {
       this.drag = true;
-      console.log('Drag started');
     },
     onEnd: function onEnd(event) {
       this.drag = false;
-      console.log('Drag ended');
-      // Handle the end of the dragging
       this.updateListOrder();
-      console.log(this.listItem.cards);
     },
     updateListOrder: function updateListOrder() {
+      var _this2 = this;
       this.listItem.cards.forEach(function (card, index) {
         card.order = index;
+      });
+      var data = this.listItem.cards.map(function (card) {
+        return {
+          id: card.id,
+          order: card.order
+        };
+      });
+      _client__WEBPACK_IMPORTED_MODULE_3___default().post("lists/".concat(this.listItem.id, "/cards/order-update"), {
+        data: data
+      }).then(function (_ref2) {
+        var data = _ref2.data.data;
+        _this2.listItem.cards = data;
+      })["catch"](function (error) {
+        console.log(error);
       });
     },
     showCardDetails: function showCardDetails(card) {
@@ -164,14 +170,28 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       this.showCreateModal = true;
     },
     createCard: function createCard(data) {
-      var _this2 = this;
-      _client__WEBPACK_IMPORTED_MODULE_3___default().post('cards', _objectSpread(_objectSpread({}, data), {}, {
-        list_id: this.listItem.id
-      })).then(function (_ref2) {
-        var data = _ref2.data.data;
-        console.log(data);
-        _this2.listItem.cards.push(data);
-        _this2.showCreateModal = false;
+      var _this3 = this;
+      _client__WEBPACK_IMPORTED_MODULE_3___default().post("lists/".concat(this.listItem.id, "/cards"), data).then(function (_ref3) {
+        var data = _ref3.data.data;
+        _this3.listItem.cards.push(data);
+        _this3.showCreateModal = false;
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    onMoved: function onMoved(_ref4) {
+      var _this4 = this;
+      var added = _ref4.added;
+      if (!added) {
+        return;
+      }
+      var card = added.element;
+      var newOrder = added.newIndex;
+      _client__WEBPACK_IMPORTED_MODULE_3___default().post("lists/".concat(this.listItem.id, "/cards/").concat(card.id, "/move"), {
+        order: newOrder
+      }).then(function (_ref5) {
+        var data = _ref5.data.data;
+        _this4.$emit('fetch-lists');
       })["catch"](function (error) {
         console.log(error);
       });
@@ -587,7 +607,7 @@ var render = function render() {
     staticClass: "board__list-header"
   }, [_c("h2", {
     staticClass: "board__list-title"
-  }, [_vm._v(_vm._s(_vm.title))]), _vm._v(" "), _c("button", {
+  }, [_vm._v(_vm._s(_vm.title) + " " + _vm._s(_vm.listItem.id))]), _vm._v(" "), _c("button", {
     staticClass: "delete-list-btn",
     on: {
       click: _vm.deleteList
@@ -599,7 +619,8 @@ var render = function render() {
     },
     on: {
       start: _vm.onstart,
-      end: _vm.onEnd
+      end: _vm.onEnd,
+      change: _vm.onMoved
     },
     model: {
       value: _vm.listItem.cards,
@@ -1005,7 +1026,8 @@ var render = function render() {
         listItem: listItem
       },
       on: {
-        "delete-list": _vm.listDeleted
+        "delete-list": _vm.listDeleted,
+        "fetch-list": _vm.getList
       }
     });
   }), _vm._v(" "), _c("div", {

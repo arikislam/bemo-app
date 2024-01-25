@@ -1,7 +1,7 @@
 <template>
   <div class="board">
     <draggable class="board__draggable" v-model="lists" group="lists" @start="onstart" @end="onEnd" @update-cards="handleCardUpdate">
-      <list-item v-for="listItem in lists" :listItem="listItem" :key="listItem.id" @delete-list="listDeleted"/>
+      <list-item v-for="listItem in lists" :listItem="listItem" :key="listItem.id" @delete-list="listDeleted" @fetch-list="getList"/>
       <div class="board__list" :draggable="false">
         <button class="add-list-btn" @click="addList">Add List</button>
       </div>
