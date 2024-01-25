@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
+
 Route::get('/lists', GetListDetailsController::class);
 Route::post('/lists', CreateNewListController::class);
 Route::post('/lists/order-update', UpdateLIstOrderController::class);

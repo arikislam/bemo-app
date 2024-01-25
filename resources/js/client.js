@@ -1,7 +1,8 @@
 const axios = require('axios');
 
+const baseUrl = process.env.MIX_APP_URL;
 const httpClient = axios.create({
-    baseURL: 'http://bemo.test/api',
+    baseURL: baseUrl + '/api',
     timeout: 15000,
     headers: {
         Accept: 'application/json',
