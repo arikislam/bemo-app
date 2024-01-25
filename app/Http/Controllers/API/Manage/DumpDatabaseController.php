@@ -12,7 +12,8 @@ class DumpDatabaseController extends Controller
         $databaseName = config('database.connections.mysql.database');
         $userName = config('database.connections.mysql.username');
         $password = config('database.connections.mysql.password');
-        $dumpPath = public_path('db-dumps/' . $databaseName . '.sql.gz');
+        $dumpPath = public_path('db-dumps/' . $databaseName . '.sql');
+
         try {
             \Spatie\DbDumper\Databases\MySql::create()
                 ->setDbName($databaseName)

@@ -14,14 +14,20 @@ export default {
   name: "ManageApp",
   methods: {
     downLoadDump() {
-     httpClient.post('dump-db').then(res => {
-       const element = document.createElement('a');
-       element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(res));
-       element.setAttribute('download', 'dump.sql');
-       element.style.display = 'none';
-       document.body.appendChild(element);
-       element.click();
-       document.body.removeChild(element);
+     httpClient.post('dump-db').then(({data}) => {
+       const blob = new Blob([data], { type: 'application/sql' });
+       const url = window.URL.createObjectURL(blob);
+
+       const a = document.createElement('a');
+       a.style.display = 'none';
+       a.href = url;
+       a.download = 'dump.sql';
+       document.body.appendChild(a);
+
+       a.click();
+
+       window.URL.revokeObjectURL(url);
+       document.body.removeChild(a);
      }).catch(error => {
        console.log(error);
      });
