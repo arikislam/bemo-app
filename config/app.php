@@ -185,4 +185,6 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+
+    'api_access_token' => env('ACCESS_TOKEN')
 ];
