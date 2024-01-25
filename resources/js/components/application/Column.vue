@@ -11,9 +11,14 @@
 
     <button class="add-list-btn" @click="addCard">Add Card</button>
 
-    <card-details :card="selectedCard" v-if="showModal" :showModal="showModal" @close="showModal=false"
-                  @save="saveData"/>
-    <crete-card :show-modal="showCreateModal" v-if="showCreateModal" @close="showCreateModal=false"
+    <card-details :card="selectedCard"
+                  v-if="showModal"
+                  :showModal="showModal"
+                  @close="showModal=false"
+                  @update="saveData"/>
+    <crete-card :show-modal="showCreateModal"
+                v-if="showCreateModal"
+                @close="showCreateModal=false"
                 @create="createCard"/>
   </div>
 
@@ -95,7 +100,22 @@ export default {
       this.showModal = true;
     },
     saveData(data) {
-      console.log(data);
+      httpClient.patch(`lists/${this.listItem.id}/cards/${data.id}`, data)
+          .then(({data: {data : updatedCard}}) => {
+
+            this.listItem.cards = this.listItem.cards.map(card => {
+              if (card.id === updatedCard.id) {
+                card.title = updatedCard.title;
+                card.details = updatedCard.details;
+              }
+              return card;
+            });
+            this.showModal = false;
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      this.showModal = false;
     },
     addCard() {
       this.showCreateModal = true;

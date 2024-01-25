@@ -2,26 +2,36 @@
   <div class="modal" v-if="showModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>EDIT CARD</h2>
+        <h2>Edit Card</h2>
       </div>
       <div class="modal-body">
         <form @submit.prevent="saveModal">
           <div class="form-group">
             <label for="title">Title:</label>
-            <input type="text" id="title" v-model="formData.title" />
+            <input
+                type="text"
+                id="title"
+                v-model="formData.title"
+            />
+            <span style="color: red" v-if="error.hasOwnProperty('title')">{{ error.title }}</span>
           </div>
           <div class="form-group">
-            <label for="description">Description:</label>
-            <textarea id="description" v-model="formData.description"></textarea>
+            <label for="details">Details:</label>
+            <textarea
+                class="styled-textarea"
+                id="details"
+                rows="4"
+                v-model="formData.details"
+            />
+            <span style="color: red" v-if="error.hasOwnProperty('details')">{{ error.details }}</span>
           </div>
           <div class="modal-buttons">
-            <button type="submit" class="btn-save" @click="saveData">Save</button>
+            <button type="submit" class="btn-save">Save</button>
             <button @click="closeModal" class="btn-close">Close</button>
           </div>
         </form>
       </div>
     </div>
-    <div class="modal-overlay" @click="closeModal"></div>
   </div>
 </template>
 
@@ -29,41 +39,69 @@
 export default {
   props: {
     showModal: Boolean,
-    card: Object,
+    card: {
+      type: Object,
+      required: true
+    }
   },
   data() {
     return {
       formData: {
         title: '',
-        description: '', // Changed from "details" to "description"
+        details: ''
       },
+      error: {
+        title: '',
+        details: ''
+      }
     };
   },
   methods: {
     closeModal() {
+      this.formData = {
+        title: '',
+        details: ''
+      };
       this.$emit('close');
-      this.formData.title = '';
-      this.formData.description = '';
     },
     saveModal() {
-      this.$emit('save-modal', this.formData);
-      this.closeModal();
+      if(!this.validateForm()) {
+        return;
+      }
+      this.$emit('update', this.formData);
     },
-    saveData() {
-      this.$emit('save-data', this.formData);
-      this.closeModal();
+
+    validateForm() {
+      this.error = {
+        title: '',
+        details: ''
+      };
+
+      if (!this.formData.title.length || this.formData.title === '') {
+        this.error.title = 'Title is required.';
+        return false;
+      }
+
+      if (!this.formData.details.length || this.formData.details === '') {
+        this.error.details = 'Details is required.';
+        return false;
+      }
+      return true;
     },
   },
   mounted() {
-    if (this.card) {
-      this.formData = this.card;
-    }
-  },
+    this.formData = {
+      id: this.card.id,
+      card_list_id: this.card.card_list_id,
+      title: this.card.title,
+      details: this.card.details
+    };
+  }
 };
 </script>
 
 <style lang="scss" scoped>
-/* Add your SCSS styles here */
+/* Modal Styles */
 .modal {
   position: fixed;
   top: 0;
@@ -76,13 +114,21 @@ export default {
   align-items: center;
   z-index: 1000;
 
+  .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
   .modal-content {
     background-color: white;
     padding: 20px;
-    border-radius: 10px; // Make the modal bigger
+    border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     max-width: 80%;
-    width: 500px; // Adjust the width as needed
+    width: 500px;
 
     .modal-header {
       text-align: center;
@@ -94,6 +140,25 @@ export default {
 
       .form-group {
         margin-bottom: 20px;
+      }
+
+      label {
+        font-weight: bold;
+      }
+
+      input[type="text"] {
+        width: 90%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+      .styled-textarea {
+        width: 90%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
       }
 
       .modal-buttons {
@@ -117,14 +182,6 @@ export default {
         }
       }
     }
-  }
-
-  .modal-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
   }
 }
 </style>

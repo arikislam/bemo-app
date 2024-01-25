@@ -164,24 +164,38 @@ __webpack_require__.r(__webpack_exports__);
       this.showModal = true;
     },
     saveData: function saveData(data) {
-      console.log(data);
+      var _this3 = this;
+      _client__WEBPACK_IMPORTED_MODULE_3___default().patch("lists/".concat(this.listItem.id, "/cards/").concat(data.id), data).then(function (_ref3) {
+        var updatedCard = _ref3.data.data;
+        _this3.listItem.cards = _this3.listItem.cards.map(function (card) {
+          if (card.id === updatedCard.id) {
+            card.title = updatedCard.title;
+            card.details = updatedCard.details;
+          }
+          return card;
+        });
+        _this3.showModal = false;
+      })["catch"](function (error) {
+        console.log(error);
+      });
+      this.showModal = false;
     },
     addCard: function addCard() {
       this.showCreateModal = true;
     },
     createCard: function createCard(data) {
-      var _this3 = this;
-      _client__WEBPACK_IMPORTED_MODULE_3___default().post("lists/".concat(this.listItem.id, "/cards"), data).then(function (_ref3) {
-        var data = _ref3.data.data;
-        _this3.listItem.cards.push(data);
-        _this3.showCreateModal = false;
+      var _this4 = this;
+      _client__WEBPACK_IMPORTED_MODULE_3___default().post("lists/".concat(this.listItem.id, "/cards"), data).then(function (_ref4) {
+        var data = _ref4.data.data;
+        _this4.listItem.cards.push(data);
+        _this4.showCreateModal = false;
       })["catch"](function (error) {
         console.log(error);
       });
     },
-    onMoved: function onMoved(_ref4) {
-      var _this4 = this;
-      var added = _ref4.added;
+    onMoved: function onMoved(_ref5) {
+      var _this5 = this;
+      var added = _ref5.added;
       if (!added) {
         return;
       }
@@ -189,9 +203,9 @@ __webpack_require__.r(__webpack_exports__);
       var newOrder = added.newIndex;
       _client__WEBPACK_IMPORTED_MODULE_3___default().post("lists/".concat(this.listItem.id, "/cards/").concat(card.id, "/move"), {
         order: newOrder
-      }).then(function (_ref5) {
-        var data = _ref5.data.data;
-        _this4.$emit('fetch-lists');
+      }).then(function (_ref6) {
+        var data = _ref6.data.data;
+        _this5.$emit('fetch-lists');
       })["catch"](function (error) {
         console.log(error);
       });
@@ -215,35 +229,60 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: {
     showModal: Boolean,
-    card: Object
+    card: {
+      type: Object,
+      required: true
+    }
   },
   data: function data() {
     return {
       formData: {
         title: '',
-        description: '' // Changed from "details" to "description"
+        details: ''
+      },
+      error: {
+        title: '',
+        details: ''
       }
     };
   },
   methods: {
     closeModal: function closeModal() {
+      this.formData = {
+        title: '',
+        details: ''
+      };
       this.$emit('close');
-      this.formData.title = '';
-      this.formData.description = '';
     },
     saveModal: function saveModal() {
-      this.$emit('save-modal', this.formData);
-      this.closeModal();
+      if (!this.validateForm()) {
+        return;
+      }
+      this.$emit('update', this.formData);
     },
-    saveData: function saveData() {
-      this.$emit('save-data', this.formData);
-      this.closeModal();
+    validateForm: function validateForm() {
+      this.error = {
+        title: '',
+        details: ''
+      };
+      if (!this.formData.title.length || this.formData.title === '') {
+        this.error.title = 'Title is required.';
+        return false;
+      }
+      if (!this.formData.details.length || this.formData.details === '') {
+        this.error.details = 'Details is required.';
+        return false;
+      }
+      return true;
     }
   },
   mounted: function mounted() {
-    if (this.card) {
-      this.formData = this.card;
-    }
+    this.formData = {
+      id: this.card.id,
+      card_list_id: this.card.card_list_id,
+      title: this.card.title,
+      details: this.card.details
+    };
   }
 });
 
@@ -653,7 +692,7 @@ var render = function render() {
       close: function close($event) {
         _vm.showModal = false;
       },
-      save: _vm.saveData
+      update: _vm.saveData
     }
   }) : _vm._e(), _vm._v(" "), _vm.showCreateModal ? _c("crete-card", {
     attrs: {
@@ -727,59 +766,61 @@ var render = function render() {
         _vm.$set(_vm.formData, "title", $event.target.value);
       }
     }
-  })]), _vm._v(" "), _c("div", {
+  }), _vm._v(" "), _vm.error.hasOwnProperty("title") ? _c("span", {
+    staticStyle: {
+      color: "red"
+    }
+  }, [_vm._v(_vm._s(_vm.error.title))]) : _vm._e()]), _vm._v(" "), _c("div", {
     staticClass: "form-group"
   }, [_c("label", {
     attrs: {
-      "for": "description"
+      "for": "details"
     }
-  }, [_vm._v("Description:")]), _vm._v(" "), _c("textarea", {
+  }, [_vm._v("Details:")]), _vm._v(" "), _c("textarea", {
     directives: [{
       name: "model",
       rawName: "v-model",
-      value: _vm.formData.description,
-      expression: "formData.description"
+      value: _vm.formData.details,
+      expression: "formData.details"
     }],
+    staticClass: "styled-textarea",
     attrs: {
-      id: "description"
+      id: "details",
+      rows: "4"
     },
     domProps: {
-      value: _vm.formData.description
+      value: _vm.formData.details
     },
     on: {
       input: function input($event) {
         if ($event.target.composing) return;
-        _vm.$set(_vm.formData, "description", $event.target.value);
+        _vm.$set(_vm.formData, "details", $event.target.value);
       }
     }
-  })]), _vm._v(" "), _c("div", {
+  }), _vm._v(" "), _vm.error.hasOwnProperty("details") ? _c("span", {
+    staticStyle: {
+      color: "red"
+    }
+  }, [_vm._v(_vm._s(_vm.error.details))]) : _vm._e()]), _vm._v(" "), _c("div", {
     staticClass: "modal-buttons"
   }, [_c("button", {
     staticClass: "btn-save",
     attrs: {
       type: "submit"
-    },
-    on: {
-      click: _vm.saveData
     }
   }, [_vm._v("Save")]), _vm._v(" "), _c("button", {
     staticClass: "btn-close",
     on: {
       click: _vm.closeModal
     }
-  }, [_vm._v("Close")])])])])]), _vm._v(" "), _c("div", {
-    staticClass: "modal-overlay",
-    on: {
-      click: _vm.closeModal
-    }
-  })]) : _vm._e();
+  }, [_vm._v("Close")])])])])])]) : _vm._e();
 };
 var staticRenderFns = [function () {
   var _vm = this,
     _c = _vm._self._c;
   return _c("div", {
     staticClass: "modal-header"
-  }, [_c("h2", [_vm._v("EDIT CARD")])]);
+  }, [_c("h2", [_vm._v("Edit Card")])]);
 }];
 render._withStripped = true;
 
@@ -3137,7 +3178,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "/* Add your SCSS styles here */\n.modal[data-v-8dd7181a] {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, 0.7);\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  z-index: 1000;\n}\n.modal .modal-content[data-v-8dd7181a] {\n  background-color: white;\n  padding: 20px;\n  border-radius: 10px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);\n  max-width: 80%;\n  width: 500px;\n}\n.modal .modal-content .modal-header[data-v-8dd7181a] {\n  text-align: center;\n  margin-bottom: 20px;\n}\n.modal .modal-content .modal-body[data-v-8dd7181a] {\n  text-align: left;\n}\n.modal .modal-content .modal-body .form-group[data-v-8dd7181a] {\n  margin-bottom: 20px;\n}\n.modal .modal-content .modal-body .modal-buttons[data-v-8dd7181a] {\n  text-align: center;\n}\n.modal .modal-content .modal-body .modal-buttons .btn-save[data-v-8dd7181a] {\n  background-color: #4CAF50;\n  color: white;\n  border: none;\n  border-radius: 5px;\n  padding: 10px 20px;\n  margin-right: 10px;\n}\n.modal .modal-content .modal-body .modal-buttons .btn-close[data-v-8dd7181a] {\n  background-color: #ccc;\n  color: #333;\n  border: none;\n  border-radius: 5px;\n  padding: 10px 20px;\n}\n.modal .modal-overlay[data-v-8dd7181a] {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "/* Modal Styles */\n.modal[data-v-8dd7181a] {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, 0.7);\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  z-index: 1000;\n}\n.modal .modal-overlay[data-v-8dd7181a] {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n}\n.modal .modal-content[data-v-8dd7181a] {\n  background-color: white;\n  padding: 20px;\n  border-radius: 10px;\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);\n  max-width: 80%;\n  width: 500px;\n}\n.modal .modal-content .modal-header[data-v-8dd7181a] {\n  text-align: center;\n  margin-bottom: 20px;\n}\n.modal .modal-content .modal-body[data-v-8dd7181a] {\n  text-align: left;\n}\n.modal .modal-content .modal-body .form-group[data-v-8dd7181a] {\n  margin-bottom: 20px;\n}\n.modal .modal-content .modal-body label[data-v-8dd7181a] {\n  font-weight: bold;\n}\n.modal .modal-content .modal-body input[type=text][data-v-8dd7181a] {\n  width: 90%;\n  padding: 10px;\n  border: 1px solid #ccc;\n  border-radius: 5px;\n  font-size: 16px;\n}\n.modal .modal-content .modal-body .styled-textarea[data-v-8dd7181a] {\n  width: 90%;\n  padding: 10px;\n  border: 1px solid #ccc;\n  border-radius: 5px;\n  font-size: 16px;\n}\n.modal .modal-content .modal-body .modal-buttons[data-v-8dd7181a] {\n  text-align: center;\n}\n.modal .modal-content .modal-body .modal-buttons .btn-save[data-v-8dd7181a] {\n  background-color: #4CAF50;\n  color: white;\n  border: none;\n  border-radius: 5px;\n  padding: 10px 20px;\n  margin-right: 10px;\n}\n.modal .modal-content .modal-body .modal-buttons .btn-close[data-v-8dd7181a] {\n  background-color: #ccc;\n  color: #333;\n  border: none;\n  border-radius: 5px;\n  padding: 10px 20px;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
