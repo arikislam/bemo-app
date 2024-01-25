@@ -22,4 +22,14 @@ class Card extends Model
     {
         return $this->belongsTo(CardList::class);
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($card) {
+            $maxOrder = $card->cardList->cards->max('order');
+            $card->order = $maxOrder + 1;
+        });
+    }
 }

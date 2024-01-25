@@ -15,7 +15,7 @@ import draggable from 'vuedraggable';
 import ListItem from '../components/application/Column.vue';
 import Card from "../components/application/Card.vue";
 import httpClient from "../client";
-import CreteList from "../components/application/modals/CreteList.vue";
+import CreteList from "../components/application/modals/CreateList.vue";
 export default {
   name: "Board",
   components: {

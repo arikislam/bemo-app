@@ -8,8 +8,11 @@
       <card v-for="card in listItem.cards" :card="card" :key="card.id" @cardClick="showCardDetails"/>
     </draggable>
 
+    <button class="add-list-btn" @click="addCard">Add Card</button>
+
     <card-details :card="selectedCard" v-if="showModal" :showModal="showModal" @close="showModal=false"
                   @save="saveData"/>
+    <crete-card :show-modal="showCreateModal" v-if="showCreateModal" @close="showCreateModal=false" @create="createCard"/>
   </div>
 
 </template>
@@ -19,9 +22,10 @@ import draggable from 'vuedraggable';
 import Card from "./Card.vue";
 import CardDetails from "./modals/CardDetails.vue";
 import httpClient from "../../client";
-
+import CreteCard from "./modals/CreateCard.vue";
 export default {
   components: {
+    CreteCard,
     Card,
     draggable,
     CardDetails
@@ -36,7 +40,8 @@ export default {
     return {
       drag: false,
       showModal: false,
-      selectedCard: null
+      selectedCard: null,
+      showCreateModal: false
     }
   },
   computed: {
@@ -78,6 +83,20 @@ export default {
     },
     saveData(data) {
       console.log(data);
+    },
+    addCard() {
+     this.showCreateModal = true;
+    },
+    createCard(data) {
+      httpClient.post('cards', {...data, list_id: this.listItem.id})
+          .then(({data: {data}}) => {
+            console.log(data);
+            this.listItem.cards.push(data);
+            this.showCreateModal= false;
+          })
+          .catch(error => {
+            console.log(error);
+          });
     }
 
   }
