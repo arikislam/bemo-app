@@ -24,15 +24,18 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::get('/lists', GetListDetailsController::class);
-Route::post('/lists', CreateNewListController::class);
-Route::post('/lists/order-update', UpdateLIstOrderController::class);
-Route::delete('/lists/{cardList}', DeleteListController::class);
+Route::group(['prefix' => 'lists'], function () {
+    Route::get('/', GetListDetailsController::class);
+    Route::post('/', CreateNewListController::class);
+    Route::post('/order-update', UpdateListOrderController::class);
+    Route::delete('/{cardList}', DeleteListController::class);
 
+    Route::prefix('{cardList}/cards')->group(function () {
+        Route::post('/', CreateCardController::class);
+        Route::post('/order-update', UpdateCardOrderController::class);
+        Route::patch('/{card}', UpdateCardController::class);
+        Route::post('/{card}/move', MoveCardController::class);
+    });
+});
 
-Route::post('/lists/{cardList}/cards', CreateCardController::class);
-Route::post('/lists/{cardList}/cards/order-update', UpdateCardOrderController::class);
-Route::patch('/lists/{cardList}/cards/{card}', UpdateCardController::class);
-Route::post('/lists/{cardList}/cards/{card}/move', MoveCardController::class);
-
-Route::post('dump-db', DumpDatabaseController::class);
+Route::post('/dump-db', DumpDatabaseController::class);
